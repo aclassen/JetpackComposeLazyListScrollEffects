@@ -40,9 +40,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
-import coil.util.DebugLogger
-import com.google.accompanist.coil.CoilImage
 import com.google.accompanist.coil.LocalImageLoader
+import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.imageloading.ImageLoadState
 import io.burnoutcrew.lazylistscrolleffectssample.ui.theme.LazyListScrollEffectsSampleTheme
 import kotlin.math.absoluteValue
 
@@ -128,7 +128,7 @@ private fun ImageCardRow(items: List<ImageItem>) {
                 imageModifier = Modifier
                     .requiredWidth(220.dp)
                     .graphicsLayer {
-                        translationX = state.layoutInfo.normalizedItemPosition(item.id) * 30
+                        translationX = state.layoutInfo.normalizedItemPosition(item.id) * -30
                     }
             )
         }
@@ -146,10 +146,9 @@ private fun MaxWidthImageCard(state: LazyListState, item: ImageItem) {
         imageModifier = Modifier
             .requiredHeight(350.dp)
             .graphicsLayer {
-                translationY = state.layoutInfo.normalizedItemPosition(item.id) * 50
+                translationY = state.layoutInfo.normalizedItemPosition(item.id) * -50
             },
     )
-
 }
 
 @Composable
@@ -183,18 +182,17 @@ private fun ImageCard(item: ImageItem, modifier: Modifier = Modifier, imageModif
         shape = RoundedCornerShape(8.dp),
         modifier = modifier
     ) {
+        val painter = rememberCoilPainter(item.imageUrl)
         Box {
-            CoilImage(
-                data = item.imageUrl,
-                contentDescription = item.title,
+            Image(
+                painter = painter,
                 contentScale = ContentScale.Crop,
-                modifier = imageModifier,
-                loading = {
-                    Box(Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    }
-                }
+                contentDescription = item.title,
+                modifier = imageModifier
             )
+            if (painter.loadState is ImageLoadState.Loading) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
+            }
             Text(
                 text = item.title,
                 modifier = Modifier
